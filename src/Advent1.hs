@@ -7,7 +7,6 @@ import Data.List
 
 otherChar i dst str = str!!((i + dst) `mod` (length str))
 
-comparisons :: String -> [(Char, Char)]
 comparisons str = zip str $ map (\x -> otherChar x dst str) [0..lstr]
   where lstr = length str
         dst = lstr `div` 2
