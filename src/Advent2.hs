@@ -13,13 +13,16 @@ minmax l = (minimum l, maximum l)
 
 sumn (mn, mx) = mx - mn
 
-finddivs l = (1, 2)
+divn (mn, mx) = mx `div` mn
+
+finddivs l = head [order i j | i <- l, j <- l, i /= j, i `rem` j == 0]
+  where order i j = if (i < j) then (i, j) else (j, i)
 
 -- Answers
 -- map (sumn.minmax)).
 advent2_1 = foldl (+) 0 $ map (sumn . minmax . (map (toInt)) . words) $ lines input
   
-advent2_2 = foldl (+) 0 $ map (sumn . finddivs . (map (toInt)) . words) $ lines input
+advent2_2 = foldl (+) 0 $ map (divn . finddivs . (map (toInt)) . words) $ lines input
 
 -- Input
 
