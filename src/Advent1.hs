@@ -3,6 +3,14 @@ module Advent1
   ) where
 
 import Data.Char
+import Data.List
+
+otherChar i dst str = str!!((i + dst) `mod` (length str))
+
+comparisons :: String -> [(Char, Char)]
+comparisons str = zip str $ map (\x -> otherChar x dst str) [0..lstr]
+  where lstr = length str
+        dst = lstr `div` 2
 
 getFirstChar s@(x:_) = (x, s)
 
@@ -17,7 +25,7 @@ sameNextChar (f, (x:y:xs))
 
 advent1_1 = foldl (+) 0 $ map (digitToInt) $ sameNextChar $ getFirstChar input
 
-advent1_2 = 0
+advent1_2 = foldl (+) 0 $ map (digitToInt.fst) $ filter (\(x, y) -> x == y) $ comparisons input
 
 -- Input
 
