@@ -25,6 +25,22 @@ coordinates n (numSeq, biggestOdd, biggestOddSquared) side
         middleUp = biggestOddSquared - (biggestOdd - 1) * 2 - (biggestOdd `div` 2)
         middleRt = biggestOddSquared - (biggestOdd - 1) * 3 - (biggestOdd `div` 2)
 
+-- advent3_2
+
+data Cell = Cell {
+  cellGenPos :: Int,
+  cellX :: Int,
+  cellY :: Int,
+  cellValue :: Int
+} deriving (Show)
+
+generator 0 = Cell {
+  cellGenPos = 0,
+  cellX = 0,
+  cellY = 0,
+  cellValue = 1
+}
+
 -- Answers
 
 advent3_1 = crsum cr
