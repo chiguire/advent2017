@@ -2,7 +2,7 @@ module Advent3
     ( advent3_1, advent3_2
     ) where
 
-data SquareSide = Dn | Lf | Up | Rt deriving (Show, Eq)
+data SquareSide = Rt | Up | Lf | Dn deriving (Show, Enum, Bounded, Eq)
 
 squaredOdds = [(i, odd i, (odd i) ^ 2) | i <- [0..]] where odd n = 2 * n + 1
 
@@ -27,19 +27,22 @@ coordinates n (numSeq, biggestOdd, biggestOddSquared) side
 
 -- advent3_2
 
-data Cell = Cell {
-  cellGenPos :: Int,
-  cellX :: Int,
-  cellY :: Int,
-  cellValue :: Int
-} deriving (Show)
+sidesSequence = [toEnum (i `rem` (fromEnum (maxBound :: SquareSide) + 1)) :: SquareSide | i <- [0..]]
 
-generator 0 = Cell {
-  cellGenPos = 0,
-  cellX = 0,
-  cellY = 0,
-  cellValue = 1
-}
+integerSequence = concat [replicate 2 i | i <- [1..]]
+
+instructions = zip integerSequence sidesSequence
+
+directionSequence = concat [replicate n d | (n,d) <- instructions]
+
+move (x, y) Rt = (x + 1, y)
+move (x, y) Up = (x, y - 1)
+move (x, y) Lf = (x - 1, y)
+move (x, y) Dn = (x, y + 1)
+
+start = (0, 0)
+
+coordinatesSequence n = foldl (\c d -> move c d) start (take n directionSequence)
 
 -- Answers
 
@@ -49,7 +52,7 @@ advent3_1 = crsum cr
         cr = coordinates input hb ws
         crsum (x, y) = (abs x) + (abs y)
 
-advent3_2 = 0
+advent3_2 = take 20 [(i, coordinatesSequence i) | i <- [0..]]
 
 -- Input
 
