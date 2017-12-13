@@ -7,6 +7,29 @@ import Control.Monad.State.Lazy
 import Data.List
 import Text.Heredoc
 
+executeOffset2 :: Int -> (State [Int] Int)
+executeOffset2 current = do
+  instructions <- get
+  let (before, after) = splitAt current instructions
+  let offset = head after
+  let newChange = if (offset >= 3) then -1 else 1
+  put $ before ++ [offset + newChange] ++ (tail after)
+  return (current + offset)
+
+jump2 :: Int -> [Int] -> (Int, [Int])
+jump2 current offsets = runState (executeOffset2 current) offsets
+
+jump2All :: Int -> [Int] -> (State Int Int)
+jump2All current offsets = do
+  loops <- get
+  let l = length offsets
+  let (newCurrent, newOffsets) = jump2 current offsets
+  put (loops + 1)
+  if ((newCurrent < 0) || (newCurrent >= l)) then
+    return newCurrent
+  else
+    jump2All newCurrent newOffsets
+
 executeOffset :: Int -> (State [Int] Int)
 executeOffset current = do
   instructions <- get
@@ -33,7 +56,7 @@ jumpAll current offsets = do
 
 advent5_1 = runState (jumpAll 0 input) 0
 
-advent5_2 = 0
+advent5_2 = runState (jump2All 0 input) 0
 
 -- Input
 
