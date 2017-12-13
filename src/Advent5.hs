@@ -15,12 +15,23 @@ executeOffset current = do
   put $ before ++ [offset + 1] ++ (tail after)
   return (current + offset)
  
-jump :: [Int] -> (Int, [Int])
-jump offsets = runState (executeOffset 0) offsets
+jump :: Int -> [Int] -> (Int, [Int])
+jump current offsets = runState (executeOffset current) offsets
+
+jumpAll :: Int -> [Int] -> (State Int Int)
+jumpAll current offsets = do
+  loops <- get
+  let l = length offsets
+  let (newCurrent, newOffsets) = jump current offsets
+  put (loops + 1)
+  if ((newCurrent < 0) || (newCurrent > l)) then
+    return newCurrent
+  else
+    jumpAll newCurrent newOffsets
 
 -- Answers
 
-advent5_1 = 0 -- takeWhile (\(current, st) -> (current > 0) && (current < (length st))) (iterate jump input)
+advent5_1 = runState (jumpAll 0 input) 0
 
 advent5_2 = 0
 
