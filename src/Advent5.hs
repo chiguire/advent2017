@@ -24,7 +24,7 @@ jumpAll current offsets = do
   let l = length offsets
   let (newCurrent, newOffsets) = jump current offsets
   put (loops + 1)
-  if ((newCurrent < 0) || (newCurrent > l)) then
+  if ((newCurrent < 0) || (newCurrent >= l)) then
     return newCurrent
   else
     jumpAll newCurrent newOffsets
