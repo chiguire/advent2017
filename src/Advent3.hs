@@ -2,8 +2,6 @@ module Advent3
     ( advent3_1, advent3_2
     ) where
 
-import Control.Monad.State.Lazy
-
 data SquareSide = Rt | Up | Lf | Dn deriving (Show, Enum, Bounded, Eq)
 
 squaredOdds = [(i, odd i, (odd i) ^ 2) | i <- [0..]] where odd n = 2 * n + 1
@@ -37,19 +35,12 @@ instructions = zip integerSequence sidesSequence
 
 directionSequence = concat [replicate n d | (n,d) <- instructions]
 
+coordinatesSequence = scanl (\c d -> move c d) (0,0) directionSequence
+
 move (x, y) Rt = (x + 1, y)
 move (x, y) Up = (x, y - 1)
 move (x, y) Lf = (x - 1, y)
 move (x, y) Dn = (x, y + 1)
-
-start = (0, 0)
-
-coordinatesSequence = scanl (\c d -> move c d) start directionSequence
-
-data MemoryState = MemoryState {
-  coordSeq :: [(Int, Int)],
-  knownValues :: [((Int, Int), Int)]
-}
 
 getValue :: Maybe Int -> Int
 getValue Nothing = 0
@@ -59,19 +50,11 @@ nextValue :: (Int, Int) -> [((Int, Int), Int)] -> Int
 nextValue (x, y) list = sum $ map (getValue . (flip lookup list)) neighbors
   where neighbors = [(x-1, y-1), (x, y-1), (x+1, y-1), (x-1, y), (x+1, y), (x-1, y+1), (x, y+1), (x+1, y+1)]
 
-accumulateCoordinates :: Int -> State MemoryState Int
-accumulateCoordinates input = do
-  memoryState <- get
-  let nextCoord = head $ coordSeq memoryState
-  let value = nextValue nextCoord $ knownValues memoryState
-  put MemoryState {
-    coordSeq = tail $ coordSeq memoryState,
-    knownValues = ((nextCoord, value):(knownValues memoryState))
-  }
-  if (value >= input) then 
-    return value
-  else
-    accumulateCoordinates input
+accumulateCoordinates :: [(Int, Int)] -> [((Int, Int), Int)] -> [((Int, Int), Int)]
+accumulateCoordinates (nextCoord:coordsSeq) list =
+  nextCoordVal : accumulateCoordinates coordsSeq (nextCoordVal : list)
+  where nextCoordVal = (nextCoord, nextVal)
+        nextVal = nextValue nextCoord list
 
 -- Answers
 
@@ -81,7 +64,7 @@ advent3_1 = crsum cr
         cr = coordinates input hb ws
         crsum (x, y) = (abs x) + (abs y)
 
-advent3_2 = fst $ runState (accumulateCoordinates 1) (MemoryState { coordSeq = coordinatesSequence, knownValues = [((0,0),1)] })
+advent3_2 = head $ dropWhile (\(c, v) -> v < input) $ accumulateCoordinates (drop 1 coordinatesSequence) [((0, 0), 1)]
 
 -- Input
 
