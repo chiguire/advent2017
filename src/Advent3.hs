@@ -2,6 +2,8 @@ module Advent3
     ( advent3_1, advent3_2
     ) where
 
+import Control.Monad.State.Lazy
+
 data SquareSide = Rt | Up | Lf | Dn deriving (Show, Enum, Bounded, Eq)
 
 squaredOdds = [(i, odd i, (odd i) ^ 2) | i <- [0..]] where odd n = 2 * n + 1
@@ -42,7 +44,34 @@ move (x, y) Dn = (x, y + 1)
 
 start = (0, 0)
 
-coordinatesSequence n = foldl (\c d -> move c d) start (take n directionSequence)
+coordinatesSequence = scanl (\c d -> move c d) start directionSequence
+
+data MemoryState = MemoryState {
+  coordSeq :: [(Int, Int)],
+  knownValues :: [((Int, Int), Int)]
+}
+
+getValue :: Maybe Int -> Int
+getValue Nothing = 0
+getValue (Just n) = n
+
+nextValue :: (Int, Int) -> [((Int, Int), Int)] -> Int
+nextValue (x, y) list = sum $ map (getValue . (flip lookup list)) neighbors
+  where neighbors = [(x-1, y-1), (x, y-1), (x+1, y-1), (x-1, y), (x+1, y), (x-1, y+1), (x, y+1), (x+1, y+1)]
+
+accumulateCoordinates :: Int -> State MemoryState Int
+accumulateCoordinates input = do
+  memoryState <- get
+  let nextCoord = head $ coordSeq memoryState
+  let value = nextValue nextCoord $ knownValues memoryState
+  put MemoryState {
+    coordSeq = tail $ coordSeq memoryState,
+    knownValues = ((nextCoord, value):(knownValues memoryState))
+  }
+  if (value >= input) then 
+    return value
+  else
+    accumulateCoordinates input
 
 -- Answers
 
@@ -52,7 +81,7 @@ advent3_1 = crsum cr
         cr = coordinates input hb ws
         crsum (x, y) = (abs x) + (abs y)
 
-advent3_2 = take 20 [(i, coordinatesSequence i) | i <- [0..]]
+advent3_2 = fst $ runState (accumulateCoordinates 1) (MemoryState { coordSeq = coordinatesSequence, knownValues = [((0,0),1)] })
 
 -- Input
 
