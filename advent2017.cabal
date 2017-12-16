@@ -15,7 +15,8 @@ extra-source-files:  README.md
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib, Advent1, Advent2, Advent3, Advent4, Advent5, Advent6, Advent7
+  exposed-modules:     Lib, Advent1, Advent2, Advent3, Advent4, Advent5, Advent6, Advent7,
+                       Advent8, Advent9, Advent10, Advent11, Advent12, Advent13, Advent14
   build-depends:       base >= 4.7 && < 5
                      , mtl
                      , split
