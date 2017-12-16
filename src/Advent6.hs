@@ -27,9 +27,14 @@ robinHood memory = distributeBlocks removeBlocks (indexIncremented winnerIndex m
   where winnerIndex = winnerBankIndex memory
         removeBlocks = getAllBlocks memory winnerIndex
 
+allDifferent :: (Eq a) => [a] -> Bool
+allDifferent list = case list of
+    []      -> True
+    (x:xs)  -> x `notElem` xs && allDifferent xs
+
 -- Answers
 
-advent6_1 = take 10 $ iterate robinHood io
+advent6_1 = length $ takeWhile (allDifferent) [take x $ iterate robinHood io | x <- [1..]]
   where io = map read $ words input
         
 advent6_2 = 0
