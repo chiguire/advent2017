@@ -32,12 +32,15 @@ allDifferent list = case list of
     []      -> True
     (x:xs)  -> x `notElem` xs && allDifferent xs
 
+distributeCycles initialBlocks start = [take x $ drop start $ iterate robinHood initialBlocks | x <- [1..]]
+    
 -- Answers
 
-advent6_1 = length $ takeWhile (allDifferent) [take x $ iterate robinHood io | x <- [1..]]
+advent6_1 = length $ takeWhile (allDifferent) $ distributeCycles io 0
   where io = map read $ words input
         
-advent6_2 = 0
+advent6_2 = length $ takeWhile (allDifferent) $ distributeCycles io 6680
+  where io = map read $ words input
 
 -- Input
 
