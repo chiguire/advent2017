@@ -22,6 +22,7 @@ library
                      , split
                      , heredoc
                      , text
+                     , parsec
   default-language:    Haskell2010
 
 executable advent2017

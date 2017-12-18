@@ -5,9 +5,66 @@ module Advent7
 
 import Text.Heredoc
 
+import Text.Parsec
+import Text.Parsec.Char
+import Text.Parsec.String
+import Data.Char
+import qualified Data.Text as T
+import Text.Parsec.Combinator (many1)
+
+data ProgramNonLinked = ProgramNL {
+  programNameNL :: T.Text,
+  programWeightNL :: Int,
+  programDepsNL :: [T.Text]
+} deriving (Show)
+
+data ProgramLinked = Program {
+  programNameL :: T.Text,
+  programWeightL :: Int,
+  programDepsL :: [ProgramLinked]
+} deriving (Show)
+
+programNameSet :: Parser String
+programNameSet = many1 lower
+
+programWeightSet :: Parser Int
+programWeightSet = do char '('
+                      w <- many1 digit
+                      char ')'
+                      return (read w :: Int)
+
+programDepSet :: Parser [String]
+programDepSet = (string " -> " >> programDepListSet) <|> (do char '\n'; return [])
+
+programDepListSet :: Parser [String]
+programDepListSet = do l <- programDepListItemSet
+                       char '\n'
+                       return l
+                       
+programDepListItemSet :: Parser [String]
+programDepListItemSet = do n <- many $ noneOf ",\n"
+                           l <- programMoreDepListItemSet
+                           return (n:l)
+
+programMoreDepListItemSet :: Parser [String]
+programMoreDepListItemSet = (char ',' >> programDepListItemSet) 
+                        <|> (return [])
+
+programLine :: Parser ProgramNonLinked
+programLine = do n <- programNameSet
+                 space
+                 w <- programWeightSet
+                 l <- programDepSet
+                 return ProgramNL { programNameNL = (T.strip $ T.pack n), programWeightNL = w, programDepsNL = map (T.strip . T.pack) l}
+
+programList :: Parser [ProgramNonLinked]
+programList = do l <- many programLine
+                 eof
+                 return l
+
 -- Answers
 
-advent7_1 = 0
+advent7_1 = parse programList "" input
 
 advent7_2 = 0
 
@@ -1049,4 +1106,5 @@ gvupyd (129)
 twyuae (37)
 ddneaes (40) -> icdcn, gunuriu, whdgk, gkouyvq
 vqijdaj (68)
-ttvyvv (26)|]
+ttvyvv (26)
+|]
